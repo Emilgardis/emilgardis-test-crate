@@ -68,7 +68,7 @@ jobs:
   publish:
     permissions:
       contents: write
-    needs: [build]
+    needs: [test, clippy]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
