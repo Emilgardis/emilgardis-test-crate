@@ -4,6 +4,9 @@ inputs:
   cargo-registry-token:
     description: 'API token for crates.io'
     required: true
+  github-token:
+    description: 'Github API token'
+    required: true
 
 runs:
   using: composite
@@ -30,7 +33,7 @@ runs:
         command: login
         args: -- ${{ inputs.cargo-registry-token }}
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ inputs.github-token }}
     - run: gh release delete --yes Unreleased || exit 0
       if: >
         github.event_name == 'push' && (
