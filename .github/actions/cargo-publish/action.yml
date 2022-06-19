@@ -32,7 +32,7 @@ runs:
     - run: gh release delete --yes Unreleased || exit 0
       if: >
         github.event_name == 'push' && (
-          github.ref == format('refs/heads/{0}', github.event.repository.default_branch) ||
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         )
       shell: bash
     - name: Create GitHub release
