@@ -27,48 +27,26 @@ jobs:
           command: fmt
           args: -- --check
 
-  clippy:
+  binary:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
+        include:
+          - { target: x86_64-apple-darwin,              os: macos-10.15 }
+          - { target: x86_64-unknown-linux-gnu,         os: ubuntu-latest }
+          - { target: x86_64-unknown-linux-musl,        os: ubuntu-latest }
+          - { target: x86_64-pc-windows-msvc,           os: windows-2019 }
     steps:
       - uses: actions/checkout@v3
-
       - uses: ./.github/actions/setup-rust
+      - uses: ./.github/actions/cargo-install-upload-artifacts
         with:
-          components: clippy
-
-      - name: Run clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --locked --all-targets --all-features -- -D warnings
-
-  test:
-    runs-on: ${{ matrix.os }}
-    needs: [fmt, clippy]
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: ./.github/actions/setup-rust
-
-      - name: Run unit tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --locked --all-targets --workspace --all-features
-        timeout-minutes: 5
+          target: ${{ matrix.target }}
 
   publish:
     permissions:
       contents: write
-    needs: [test, clippy]
+    needs: [test, binary]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
