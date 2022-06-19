@@ -3,7 +3,7 @@ name = "emilgardis-test-crate"
 version = "0.0.2-rc.1"
 edition = "2021"
 license = "WTFPL"
-
+description = "A test crate"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
