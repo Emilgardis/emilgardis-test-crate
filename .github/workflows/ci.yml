@@ -1,0 +1,78 @@
+on:
+  pull_request:
+  push:
+    branches: [main, staging, trying]
+    tags:
+      - "v*.*.*"
+
+name: CI
+
+env:
+  CARGO_NET_RETRY: 3
+  CARGO_HTTP_CHECK_REVOKE: false
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/setup-rust
+        with:
+          components: rustfmt
+
+      - name: Run rustfmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: -- --check
+
+  clippy:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/setup-rust
+        with:
+          components: clippy
+
+      - name: Run clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --locked --all-targets --all-features -- -D warnings
+
+  test:
+    runs-on: ${{ matrix.os }}
+    needs: [fmt, clippy]
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/setup-rust
+
+      - name: Run unit tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --locked --all-targets --workspace --all-features
+        timeout-minutes: 5
+
+  publish:
+    permissions:
+      contents: write
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-rust
+      - uses: ./.github/actions/cargo-publish
+        with:
+          cargo-registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
