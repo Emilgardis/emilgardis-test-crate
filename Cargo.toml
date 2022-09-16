@@ -10,3 +10,6 @@ description = "A test crate"
 
 [features]
 hello = []
+
+[workspace]
+members = ["another-one"]
